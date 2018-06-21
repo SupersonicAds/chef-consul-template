@@ -40,7 +40,6 @@ reload(){
         [ -e "$PIDFILE" ] && [ ! -z "$(cat $PIDFILE)" ] && test -d "/proc/$(cat $PIDFILE)" && kill -SIGHUP $(cat $PIDFILE)
         sleep 1
         log_daemon_msg "reloading $NAME: "
-        log_end_msg $?
 }
 status(){
     [ -e "$PIDFILE" ] && [ ! -z "$(cat $PIDFILE)" ] && test -d "/proc/$(cat $PIDFILE)" && echo "$NAME is running"
