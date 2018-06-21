@@ -1,48 +1,19 @@
+.vagrant
+Berksfile.lock
 *~
 *#
 .#*
 \#*#
 .*.sw[a-z]
 *.un~
-pkg/
-
-# Berkshelf
-.vagrant
-cookbooks/
-### Berksfile.lock
-.berkshelf
 
 # Bundler
-.rvmrc
 Gemfile.lock
-bin
-bin/**
-.bundle/**
-.chef/local-mode-cache/**
-.chef/cache/**
-**/.kitchen
-.history/
+bin/*
+.bundle/*
 
-provisioning/.cache
-provisioning/.cache/**
-.chef/clients/
-.chef/*.pem
-.chef/keys/
-.chef/nodes/
-chef.sublime-project
-chef.sublime-workspace
-nodes/
-TODO
-#Terraform
-#*.tfstate
-terraform/provisioning/.cache
-terraform/provisioning/.cache/**
-**/.terraform
-.vscode/
-.history/
-.idea/**
-.idea/
-site-cookbooks/docker/
-*.pyc
-*/*.iml
-*.iml
+.kitchen/
+.kitchen.local.yml
+
+coverage/
+.chef/
