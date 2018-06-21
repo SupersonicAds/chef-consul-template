@@ -3,8 +3,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 NAME="consul-template"
 
 USER=root
-#DAEMON="<%= @command %>"
-DAEMON="/usr/local/bin/consul-template"
+DAEMON="<%= @command %>"
 
 LOGFILE="/var/log/$NAME.log"
 
@@ -13,8 +12,9 @@ PIDFILE="/var/run/$NAME.pid"
 LOCKFILE="/var/run/lock/${NAME}"
 SHUTDOWN_TIMEOUT=1
 
-# DEAMON_OPTS="<%= @options %>"
-DEAMON_OPTS="-config /etc/consul-template/conf.d"
+[ -f /etc/default/${NAME} ] && . /etc/default/${NAME}
+
+DEAMON_OPTS="<%= @options %>"
 
 export GOMAXPROCS=${GOMAXPROCS}
 
