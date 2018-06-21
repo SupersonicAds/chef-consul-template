@@ -27,11 +27,11 @@ start() {
 }
 
 stop(){
-        [ -e "$PIDFILE" ] && [ ! -z "$(cat $PIDFILE)" ] && test -d "/proc/$(cat $PIDFILE)" && kill $(cat $PIDFILE)
+        [ -e "$PIDFILE" ] && [ ! -z "$(cat $PIDFILE)" ] && test -d "/proc/$(cat $PIDFILE)" && kill -SIGTERM $(cat $PIDFILE)
         log_daemon_msg "Stopping $NAME: "
         flock --exclusive --timeout $SHUTDOWN_TIMEOUT $LOCKFILE --command "echo -n"
         if [ $? -ne 0 ]; then
-                kill -SIGTERM $(cat $PIDFILE)
+                kill -SIGKILL $(cat $PIDFILE)
                 flock --exclusive --timeout 1 $LOCKFILE --command "echo -n"
         fi
         log_end_msg $?
