@@ -1,20 +1,10 @@
-#!/bin/sh
-### BEGIN INIT INFO
-# Provides:          consul-template
-# Required-Start:    $network $remote_fs $syslog
-# Required-Stop:     $network $remote_fs $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Consul Template Service Discovery Platform
-# Description:       Consul Template convenient way to populate values from
-#                    Consul into the filesystem using the consul-template daemon.
-### END INIT INFO
-
-CMD="<%= @command %> <%= @options %>"
+#!/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 NAME="consul-template"
 
 USER=root
-DAEMON="<%= @command %>"
+#DAEMON="<%= @command %>"
+DAEMON="/usr/local/bin/consul-template"
 
 LOGFILE="/var/log/$NAME.log"
 
@@ -23,7 +13,8 @@ PIDFILE="/var/run/$NAME.pid"
 LOCKFILE="/var/run/lock/${NAME}"
 SHUTDOWN_TIMEOUT=1
 
-DEAMON_OPTS="<%= @options %>"
+# DEAMON_OPTS="<%= @options %>"
+DEAMON_OPTS="-config /etc/consul-template/conf.d"
 
 export GOMAXPROCS=${GOMAXPROCS}
 
@@ -31,7 +22,7 @@ export GOMAXPROCS=${GOMAXPROCS}
 
 start() {
         echo "Starting $NAME: "
-        daemonize -c $WORKDIR -u $USER -p $PIDFILE -l $LOCKFILE -E GOMAXPROCS=${GOMAXPROCS} $DAEMON $DEAMON_OPTS
+        daemonize -u $USER -p $PIDFILE -l $LOCKFILE -o $LOGFILE -e $LOGFILE -E GOMAXPROCS=${GOMAXPROCS} $DAEMON $DEAMON_OPTS
         log_end_msg $?
 }
 
