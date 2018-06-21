@@ -18,15 +18,14 @@ DAEMON="<%= @command %>"
 
 LOGFILE="/var/log/$NAME.log"
 
-SCRIPTNAME=/etc/init.d/sonic-consul-${NAME}
+SCRIPTNAME=/etc/init.d/${NAME}
 PIDFILE="/var/run/$NAME.pid"
 LOCKFILE="/var/run/lock/${NAME}"
 SHUTDOWN_TIMEOUT=1
 
 AGENT_OPTS="<%= @options %>"
 
-[ -f /etc/default/${NAME} ] && . /etc/default/${NAME}
-export GOMAXPROCS=${GOMAXPROCS}
+. /lib/lsb/init-functions
 
 start() {
         echo "Starting $NAME: "
@@ -34,91 +33,29 @@ start() {
         log_end_msg $?
 }
 
-case "$1" in
-    start)
-    if is_running; then
-        echo "$NAME already running"
-    else
-        echo "Starting $NAME"
-        CONSUL_TEMPLATE_LOG=<%= @loglevel %> $CMD >> "$LOGFILE" 2>&1 &
-        echo $! > "$PIDFILE"
-        if ! is_running; then
-            echo "Unable to start $NAME, see $LOGFILE"
-            exit 1
+stop(){
+        [ -e "$PIDFILE" ] && [ ! -z "$(cat $PIDFILE)" ] && test -d "/proc/$(cat $PIDFILE)" && kill $(cat $PIDFILE)
+        log_daemon_msg "Stopping $NAME: "
+        flock --exclusive --timeout $SHUTDOWN_TIMEOUT $LOCKFILE --command "echo -n"
+        if [ $? -ne 0 ]; then
+                kill -SIGTERM $(cat $PIDFILE)
+                flock --exclusive --timeout 1 $LOCKFILE --command "echo -n"
         fi
-    fi
-    ;;
-    stop)
-    if is_running; then
-        echo -n "Stopping $NAME..."
-        kill `get_pid`
-        for i in 1 2 3 4 5 6 7 8 9 10
-        do
-            if ! is_running; then
-                break
-            fi
-
-            echo -n "."
-            sleep 2
-        done
-        echo
-
-        if is_running; then
-            echo "$NAME not stopped; Trying to send SIGTERM"
-            sleep 2
-            pkill -15 -f consul-template
-            if is_running; then
-                echo "$NAME not stopped; may still be shutting down or shutdown may have failed"
-                exit 1
-            fi
-        else
-            echo "$NAME stopped"
-            if [ -f "$PIDFILE" ]; then
-                rm "$PIDFILE"
-            fi
-        fi
-    else
-        echo "$NAME not running"
-    fi
-    ;;
-    restart)
-    $0 stop
-    if is_running; then
-        echo "Unable to stop $NAME, will not attempt to start"
-        exit 1
-    fi
-    $0 start
-    ;;
-    status)
-    if is_running; then
-        echo "$NAME is running"
-    else
+        log_end_msg $?
+}
+reload(){
+        [ -e "$PIDFILE" ] && [ ! -z "$(cat $PIDFILE)" ] && test -d "/proc/$(cat $PIDFILE)" && kill -SIGHUP $(cat $PIDFILE)
+        sleep 1
+        log_daemon_msg "reloading $NAME: "
+        log_end_msg $?
+}
+status(){
+    [ -e "$PIDFILE" ] && [ ! -z "$(cat $PIDFILE)" ] && test -d "/proc/$(cat $PIDFILE)" && echo "$NAME is running"
+    if [ $? -ne 0 ]; then
         echo "$NAME is stopped"
         exit 1
     fi
-    ;;
-    reload)
-    if is_running; then
-        echo -n "Reloading $NAME..."
-        kill -HUP `get_pid`
-        sleep 1
-        echo
-
-        if ! is_running; then
-            echo "$NAME has died, see $LOGFILE"
-            exit 1
-        fi
-    else
-        echo "$NAME not running"
-    fi
-    ;;
-    *)
-    echo "Usage: $0 {start|stop|restart|reload|status}"
-    exit 1
-    ;;
-esac
-
-exit 0
+}
 
 case "$1" in
         start)
@@ -127,14 +64,19 @@ case "$1" in
         stop)
                 stop
                 ;;
-
+        reload)
+                reload
+                ;;
+        status)
+                status
+                ;;
         restart)
                 stop
                 sleep 0.1
                 start
                 ;;
         *)
-                echo "Usage: $SCRIPTNAME {start|stop|restart}" >&2
+                echo "Usage: $SCRIPTNAME {start|stop|restart|reload}" >&2
                 exit 1
                 ;;
 esac
