@@ -23,13 +23,15 @@ PIDFILE="/var/run/$NAME.pid"
 LOCKFILE="/var/run/lock/${NAME}"
 SHUTDOWN_TIMEOUT=1
 
-AGENT_OPTS="<%= @options %>"
+DEAMON_OPTS="<%= @options %>"
+
+export GOMAXPROCS=${GOMAXPROCS}
 
 . /lib/lsb/init-functions
 
 start() {
         echo "Starting $NAME: "
-        daemonize -c $WORKDIR -u $USER -p $PIDFILE -l $LOCKFILE -o $LOGFILE -e $LOGFILE $DAEMON $AGENT_OPTS
+        daemonize -c $WORKDIR -u $USER -p $PIDFILE -l $LOCKFILE -E GOMAXPROCS=${GOMAXPROCS} $DAEMON $DEAMON_OPTS
         log_end_msg $?
 }
 
