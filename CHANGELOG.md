@@ -1,6 +1,8 @@
 Consul Template Cookbook Changelog
 ==================================
 
+# 0.11.10<Or Arnon><21.06.2018><feature>
+re-writing init.d scripts, using deamonize.
 ## Unreleased
 
 IMPROVEMENTS:
