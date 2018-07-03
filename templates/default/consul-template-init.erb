@@ -37,8 +37,7 @@ stop(){
         log_end_msg $?
 }
 reload(){
-        [ -e "$PIDFILE" ] && [ ! -z "$(cat $PIDFILE)" ] && test -d "/proc/$(cat $PIDFILE)" && kill -SIGHUP $(cat $PIDFILE)
-        sleep 1
+        [ -e "$PIDFILE" ] && [ ! -z "$(cat $PIDFILE)" ] && test -d "/proc/$(cat $PIDFILE)" && kill -SIGHUP $(cat $PIDFILE  && sleep 1)
         log_daemon_msg "reloading $NAME: "
 }
 status(){
